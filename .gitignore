@@ -70,7 +70,11 @@ docs/_build/
 # PyBuilder
 target/
 
+<<<<<<< HEAD
 # Jupyter Notebook
+=======
+# IPython Notebook
+>>>>>>> 1262aa347654ad9d5edd968e125e4f788535d972
 .ipynb_checkpoints
 
 # pyenv
@@ -83,7 +87,10 @@ celerybeat-schedule
 .env
 
 # virtualenv
+<<<<<<< HEAD
 .venv/
+=======
+>>>>>>> 1262aa347654ad9d5edd968e125e4f788535d972
 venv/
 ENV/
 
@@ -92,4 +99,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1262aa347654ad9d5edd968e125e4f788535d972
