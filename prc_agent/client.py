@@ -1,7 +1,8 @@
 import argparse
 import asyncio
-
+from memory_profiler import memory_usage
 import aiohttp.server
+import functools
 
 
 class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
@@ -13,9 +14,33 @@ class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
 
     async def handle_request(self, message, payload):
         print(message)
+        # print(memory_usage(-1, interval=.2, timeout=1))
+        # loop = asyncio.get_event_loop()
+        with aiohttp.Timeout(10):
+            # http://127.0.0.1:8123
+            async with aiohttp.ClientSession() as session:
+                async with session.get(message.path) as resp:
+                    response = aiohttp.Response(
+                        self.writer, resp.status, http_version=message.version
+                    )
+                    for key, value in resp.headers.items():
+                        if (key == 'Connection'):
+                            response.add_header('Connection', 'close')
+                        else:
+                            response.add_header(key, value)
 
-    def send_response(self):
-        pass
+                    response.write(await resp.text())
+                    response.write_eof()
+
+    def send_response(self, fut):
+        print(fut)
+
+    async def fetch(url, proxy=None):
+        with aiohttp.Timeout(10):
+            # http://127.0.0.1:8123
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, proxy=proxy) as response:
+                    return await response
 
 
 def get_arg():
