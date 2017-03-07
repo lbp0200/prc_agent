@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import io
 
 import aiohttp.server
 
@@ -13,12 +14,16 @@ class ProxyRequestHandler(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.peername = transport.get_extra_info('peername')
+        print(self.args)
         if self.args.debug:
             print('Connection from {}'.format(self.peername))
         self.transport = transport
 
     def data_received(self, data):
-        print(data)
+        f = io.BytesIO(data)
+        method = f.readline()
+        host = f.readline()
+        print(host)
         self.transport.close()
 
     def send_response(self, fut):
