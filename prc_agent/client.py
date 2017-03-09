@@ -21,10 +21,14 @@ class ProxyRequestHandler(asyncio.Protocol):
 
     def data_received(self, data):
         f = io.BytesIO(data)
-        method = f.readline()
-        host = f.readline()
-        print(host)
-        self.transport.close()
+        method = f.readline().decode("utf-8")
+        host = f.readline().decode("utf-8")
+        print(method,host)
+        if method.startswith('CONNECT'):
+            print('fuck')
+            self.transport.write(b'HTTP/1.1 200 Connection Established\r\nConnection: close\r\n\r\n')
+            # self.transport.write_eof()
+        # self.transport.close()
 
     def send_response(self, fut):
         print(fut)
