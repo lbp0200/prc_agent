@@ -7,10 +7,41 @@ import aiohttp.server
 
 class ProxyRequestHandler(asyncio.Protocol):
     args = None
+    isHttps = False
+    method = None
+    targetHost = None
+    targetPort = None
+    httpVersion = None
 
     def __init__(self, args):
         super().__init__()
         self.args = args
+
+    def parseHeather(self, data):
+        f = io.BytesIO(data)
+        lines = f.readlines()
+        print(lines)
+        headers = dict()
+        length = len(lines)
+        if length > 1:
+            self.method, self.targetHost, self.httpVersion = lines[0].decode("utf-8").split(' ')
+            host = lines[1].decode("utf-8").split(':')
+            if len(host) == 2:
+                self.targetPort = 80
+            elif len(host) == 3:
+                self.targetPort = int(host[2])
+            else:
+                return headers
+            self.targetPort = host[1]
+            if length > 2:
+                for line in lines[2:]:
+                    l = line.decode("utf-8").strip()
+                    if len(l) == 0:
+                        continue
+                    key, v = l.split(':')
+                    headers[key] = v
+        print(headers)
+        return headers
 
     def connection_made(self, transport):
         self.peername = transport.get_extra_info('peername')
@@ -20,15 +51,13 @@ class ProxyRequestHandler(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data):
-        f = io.BytesIO(data)
-        method = f.readline().decode("utf-8")
-        host = f.readline().decode("utf-8")
-        print(method,host)
-        if method.startswith('CONNECT'):
-            print('fuck')
+        headers = self.parseHeather(data)
+        exit()
+        if self.method == 'CONNECT':
+            self.isHttps = True
             self.transport.write(b'HTTP/1.1 200 Connection Established\r\nConnection: close\r\n\r\n')
             # self.transport.write_eof()
-        # self.transport.close()
+            # self.transport.close()
 
     def send_response(self, fut):
         print(fut)
